@@ -39,7 +39,7 @@ jobs:
           cache: 'gradle'
       
       - name: Cache
-        uses: actions/cache@v3.0.4
+        uses: actions/cache@v3
         with:
           path: dependencies
           key: ghidra-dependencies
@@ -47,16 +47,26 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: fetch-deps
         run: |
-          gradle -I gradle/support/fetchDependencies.gradle init
+          gradle -I gradle/support/fetchDependencies.gradle init --no-daemon
           
       # Runs a set of commands using the runners shell
       - name: build
         run: |
-          gradle buildGhidra
+          gradle buildGhidra --no-daemon
+          
+      - name: find artifact name
+        id: find-artifact-name
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const globber = await glob.create('build/dist/*.zip')
+            const files = await globber.glob()
+            return files[0].split(/[\/\\]/).pop()
+          result-encoding: string
           
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
         with:
-          name: artifact ${{ matrix.os }}
-          path: build/dist/*.zip
+          name: ${{ steps.find-artifact-name.outputs.result }}
+          path: build/dist/${{ steps.find-artifact-name.outputs.result }}
           
