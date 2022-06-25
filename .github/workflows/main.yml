@@ -65,7 +65,7 @@ jobs:
           result-encoding: string
           
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.find-artifact-name.outputs.result }}
           path: build/dist/${{ steps.find-artifact-name.outputs.result }}
